@@ -95,24 +95,35 @@ Access Jenkins and setup Jenkins
 
 
 2.1.2 Install Docker
-vi docker.sh ----> Paste the below content ---->
+
 #!/bin/bash
+set -e  # Exit on any error
+
 # Update package manager repositories
-sudo apt-get update
+sudo apt-get update -y
+
 # Install necessary dependencies
-sudo apt-get install -y ca-certificates curl
+sudo apt-get install -y ca-certificates curl gnupg
+
 # Create directory for Docker GPG key
 sudo install -m 0755 -d /etc/apt/keyrings
+
 # Download Docker's GPG key
 sudo curl -fsSL https://download.docker.com/linux/ubuntu/gpg -o /etc/apt/keyrings/docker.asc
+
 # Ensure proper permissions for the key
 sudo chmod a+r /etc/apt/keyrings/docker.asc
+
 # Add Docker repository to Apt sources
-echo "deb \[arch=$(dpkg --print-architecture) signed-by=/etc/apt/keyrings/docker.asc] https://download.docker.com/linux/ubuntu \\
-$(. /etc/os-release \&\& echo "$VERSION\_CODENAME") stable" | \\
-sudo tee /etc/apt/sources.list.d/docker.list > /dev/null
-# Update package manager repositories
-sudo apt-get update
+echo \
+  "deb [arch=$(dpkg --print-architecture) signed-by=/etc/apt/keyrings/docker.asc] https://download.docker.com/linux/ubuntu \
+  $(. /etc/os-release && echo "$VERSION_CODENAME") stable" | \
+  sudo tee /etc/apt/sources.list.d/docker.list > /dev/null
+
+# Update package manager repositories again
+sudo apt-get update -y
+
+# Install Docker packages
 sudo apt-get install -y docker-ce docker-ce-cli containerd.io docker-buildx-plugin docker-compose-plugin
 
 ----> esc ----> :wq ----> sudo chmod +x docker.sh ----> ./docker.sh
@@ -140,20 +151,20 @@ Step 4: Creation of EKS Cluster
 4.1. Creation of IAM user (To create EKS Cluster, its not recommended to create using Root Account)
 
 4.2. Attach policies to the user
-AmazonEC2FullAccess, AmazonEKS\_CNI\_Policy, AmazonEKSClusterPolicy, AmazonEKSWorkerNodePolicy, AWSCloudFormationFullAccess, IAMFullAccess
+AmazonEC2FullAccess, AmazonEKS_CNI_Policy, AmazonEKSClusterPolicy, AmazonEKSWorkerNodePolicy, AWSCloudFormationFullAccess, IAMFullAccess, AmazonVPCFullAccess
 
 Attach the below inline policy also for the same user
 
 {
-  "Version": "2012-10-17",
-  "Statement": \[
-    {
-      "Sid": "VisualEditor0",
-      "Effect": "Allow",
-      "Action": "eks:\*",
-      "Resource": "\*"
-    }
-  ]
+  "Version": "2012-10-17",
+  "Statement": [
+    {
+      "Sid": "VisualEditor0",
+      "Effect": "Allow",
+      "Action": "eks:*",
+      "Resource": "*"
+    }
+  ]
 }
 
 4.3. Create Access Keys for the user created
@@ -161,28 +172,64 @@ Attach the below inline policy also for the same user
 With this we have created the IAM User with appropriate permissions to create the EKS Cluster
 
 4.4. Install AWS CLI (to interact with AWS Account)
-sudo apt update
-curl "https://awscli.amazonaws.com/awscli-exe-linux-x86\_64.zip" -o "awscliv2.zip"
-sudo apt install unzip
+#!/bin/bash
+set -e  # Exit if any command fails
+
+# Update package lists
+sudo apt update -y
+
+# Download AWS CLI v2
+curl "https://awscli.amazonaws.com/awscli-exe-linux-x86_64.zip" -o "awscliv2.zip"
+
+# Install unzip if not present
+sudo apt install unzip -y
+
+# Unzip the installer
 unzip awscliv2.zip
+
+# Install AWS CLI
 sudo ./aws/install
 
 Configure aws by executing below command
 aws configure
 
 4.5. Install KubeCTL (to interact with K8S)
+#!/bin/bash
+set -e  # Exit if any command fails
+
+# Download kubectl binary for Amazon EKS
 curl -o kubectl https://amazon-eks.s3.us-west-2.amazonaws.com/1.19.6/2021-01-05/bin/linux/amd64/kubectl
-chmod +x ./kubectl
-sudo mv ./kubectl /usr/local/bin
+
+# Make the binary executable
+chmod +x kubectl
+
+# Move it to a location in PATH
+sudo mv kubectl /usr/local/bin/
+
+# Verify installation
 kubectl version --short --client
 
+
 4.6. Install EKS CTL (used to create EKS Cluster)
-curl --silent --location "https://github.com/weaveworks/eksctl/releases/latest/download/eksctl\_$(uname -s)\_amd64.tar.gz" | tar xz -C /tmp
+#!/bin/bash
+set -e  # Exit on any error
+
+# Download and extract eksctl to /tmp
+curl --silent --location "https://github.com/weaveworks/eksctl/releases/latest/download/eksctl_$(uname -s)_amd64.tar.gz" \
+  | tar xz -C /tmp
+
+# Move binary to /usr/local/bin
 sudo mv /tmp/eksctl /usr/local/bin
+
+# Verify installation
 eksctl version
 
 4.7. Create EKS Cluster
-eksctl create cluster --name kastro-cluster --region us-east-1 --node-type t2.medium --zones us-east-1a,us-east-1b
+eksctl create cluster \
+  --name sharad-cluster \
+  --region us-east-1 \
+  --node-type t2.medium \
+  --zones us-east-1a,us-east-1b
 
 4.8. Modifying the permissions
 sudo usermod -aG docker jenkins
