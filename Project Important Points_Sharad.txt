@@ -56,25 +56,37 @@ Step 2: Tools Installation
 vi Jenkins.sh ----> Paste the below content ---->
 
 #!/bin/bash
-# Update system
+
+# Exit if any command fails
+set -e
+
+# Update packages
 sudo apt update -y
-# Install dependencies
-sudo apt install -y fontconfig openjdk-17-jre-headless wget gnupg2
-# Download and add the Jenkins GPG key
-wget -O- https://pkg.jenkins.io/debian-stable/jenkins.io-2023.key | \\
-    gpg --dearmor | sudo tee /usr/share/keyrings/jenkins-keyring.gpg > /dev/null
-# Add Jenkins repository
-echo "deb \[signed-by=/usr/share/keyrings/jenkins-keyring.gpg] https://pkg.jenkins.io/debian-stable binary/" | \\
-    sudo tee /etc/apt/sources.list.d/jenkins.list > /dev/null
-# Update package lists
+
+# Install Java (required for Jenkins)
+sudo apt install fontconfig openjdk-17-jre -y
+
+# Add Jenkins repository key and source
+curl -fsSL https://pkg.jenkins.io/debian/jenkins.io-2023.key | sudo tee \
+    /usr/share/keyrings/jenkins-keyring.asc > /dev/null
+
+echo deb [signed-by=/usr/share/keyrings/jenkins-keyring.asc] \
+    https://pkg.jenkins.io/debian binary/ | sudo tee \
+    /etc/apt/sources.list.d/jenkins.list > /dev/null
+
+# Update again after adding Jenkins repo
 sudo apt update -y
+
 # Install Jenkins
 sudo apt install jenkins -y
-# Start Jenkins
+
+# Start and enable Jenkins service
 sudo systemctl start jenkins
 sudo systemctl enable jenkins
-# Print status
-sudo systemctl status jenkins
+
+# Print Jenkins status
+sudo systemctl status jenkins --no-pager
+
 
 ----> esc ----> :wq ----> sudo chmod +x jenkins.sh ----> ./jenkins.sh
 
