@@ -9,13 +9,12 @@ pipeline {
         APP_NAME = 'knowledgehub'
     }
 
-    stages {
-        stage('Checkout') {
-            steps {
-                echo 'Checking out source code...'
-                git 'https://github.com/Sharad-Parit6094/microservices-ingress-App.git'
-            }
-        }
+    stage('Checkout') {
+    steps {
+        echo 'Checking out source code...'
+        git branch: 'main', url: 'https://github.com/Sharad-Parit6094/microservices-ingress-App.git'
+    }
+}
 
         stage('Build Docker Image') {
             steps {
