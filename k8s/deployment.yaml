@@ -1,23 +1,23 @@
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: techsolutions-deployment
+  name: knowledgehub-deployment
   namespace: default
   labels:
-    app: techsolutions
+    app: knowledgehub
 spec:
   replicas: 3
   selector:
     matchLabels:
-      app: techsolutions
+      app: knowledgehub
   template:
     metadata:
       labels:
-        app: techsolutions
+        app: knowledgehub
     spec:
       containers:
-      - name: techsolutions
-        image: sharad9642/techsolutions-app:latest
+      - name: knowledgehub
+        image: sharad9642/knowledgehub-app:latest
         ports:
         - containerPort: 80
         resources:
@@ -43,10 +43,10 @@ spec:
 apiVersion: v1
 kind: Service
 metadata:
-  name: techsolutions-service
+  name: knowledgehub-service
   namespace: default
   labels:
-    app: techsolutions
+    app: knowledgehub
 spec:
   type: ClusterIP
   ports:
@@ -54,4 +54,4 @@ spec:
     targetPort: 80
     protocol: TCP
   selector:
-    app: techsolutions
+    app: knowledgehub
