@@ -523,6 +523,7 @@ Click on Dashboards in the left pane, you can see both the dashboards you have j
 -------------------------------------------------------------------
 8. ARGO CD DEPLOYMENT
 -------------------------------------------------------------------
+sudo apt update -y
 ------------------------------------------------
 Lets setup ArgoCD using HELM;
 ------------------------------------------------
