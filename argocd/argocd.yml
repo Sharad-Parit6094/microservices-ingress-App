@@ -1,7 +1,7 @@
 apiVersion: argoproj.io/v1alpha1
 kind: Application
 metadata:
-  name: techsolutions-app
+  name: knowledgehub-app
   namespace: argocd
 spec:
   project: default
